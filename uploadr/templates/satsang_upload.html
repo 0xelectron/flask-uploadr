@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Upload Resecent Satsang Audio {% endblock %}
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Upload Recent Satsang Audio</h3>
+        </div>
+        <div class="panel-body">
+            <form id="upload-form" action="{{ url_for('upload',audio='recent_satsang') }}" method="POST" enctype="multipart/form-data">
+            
+                <strong>Files:</strong><br>
+                Select files OR drag them into the box below.
+                <input id="file-picker" type="file" name="file" accept="audio/*" multiple><p><br>
+                
+                <div id="dropbox">
+                    Drag and Drop Files Here
+                </div><p>
+                
+                <fieldset id="progress" style="display: none">
+                    <legend>Files Progress</legend>
+                    <div class="progress-trough">
+                        <div id="progress-bar" class="progress-bar">0%</div>
+                    </div>
+                </fieldset><p>
+                <br>
+                <a href="#" class="btn btn-danger">Export</a>
+                <input type="submit" class="btn btn-success " value="Upload" id="upload-button"><br><br>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/uploadr.js') }}"></script>
+{% endblock %}

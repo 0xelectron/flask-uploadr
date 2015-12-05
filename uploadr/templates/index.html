@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Upload Audio {% endblock %}
+{% block content %}
+<a href="/upload/recent_satsang" class="btn btn-warning btn-lg">Add Recent Satsang</a>
+<a href="/upload/tracks" class="btn btn-warning btn-lg">Add Tracks</a>
+{% endblock %}
+{% block js %}<script type="text/javascript" src="{{ url_for('static', filename='js/uploadr.js') }}"></script>{% endblock %}
