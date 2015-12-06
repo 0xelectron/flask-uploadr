@@ -12,10 +12,10 @@ from uuid import uuid4
 app = Flask(__name__)
 
 # Initializing an soundcloud user
-client = soundcloud.Client(client_id='72ff54677f9e7c08c3764db576281f2a',
-                           client_secret='34abea25446bd071992479ed18ad7847',
-                           username='electron47',
-                           password='DADA#blue9')
+client = soundcloud.Client(client_id='YOUR CLIENT ID',
+                           client_secret='YOUR CLIENT SECRET',
+                           username='USERNAME',
+                           password='PASSWORD')
 
 # HomePage
 @app.route("/")
