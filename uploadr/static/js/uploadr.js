@@ -3,9 +3,12 @@
  ******************************************************************************/
 
 // Constants
-var MAX_UPLOAD_FILE_SIZE = 1024*1024; // 1 MB
+var MAX_UPLOAD_FILE_SIZE = 1024*1024*250; // 250 MB
 var UPLOAD_URL = window.location.href;
 var NEXT_URL   = "/files/";
+        
+//Following files types will be added: audio/x-ms-wma,audio/mp3,audio/x-m4a,audio/flac
+var FILE_TYPES = ['audio/x-ms-wma','audio/mp3','audio/x-m4a','audio/flac'];
 
 // List of pending files to handle when the Upload button is finally clicked.
 var PENDING_FILES  = [];
@@ -26,11 +29,27 @@ $(document).ready(function() {
         // file multi-upload input box should still work. In this case they'll
         // just POST to the upload endpoint directly. However, with JS we'll do
         // the POST using ajax and then redirect them ourself when done.
-        e.preventDefault();
-        doUpload();
+        
+        // e.preventDefault();
+        validateForm(e);
     })
 });
-
+function validateForm(e) {
+    var upload = true;
+    var x = document.forms["myForm"]["playlist"].value;
+    if (x == null || x == "") {
+        alert("Need Playlist");
+        upload = false;
+    }
+    if (PENDING_FILES.length == 0 && upload == true){
+        alert("You may want to add files!");
+        upload = false;
+    }
+    if (upload == true){
+        e.preventDefault();
+        doUpload();
+    }
+}
 
 function doUpload() {
     $("#progress").show();
@@ -136,14 +155,24 @@ function collectFormData() {
 
 function handleFiles(files) {
     // Add them to the pending files list.
+    var p_f_t = true;
     for (var i = 0, ie = files.length; i < ie; i++) {
-        PENDING_FILES.push(files[i]);
+
+        if($.inArray(files[i].type, FILE_TYPES) >= 0){
+            PENDING_FILES.push(files[i]);
+        }else{
+            p_f_t = false;
+        }
+    }
+    if (p_f_t == false){
+        alert("some files have not been added as only audio file types are supported");
     }
 }
 
 
 function initDropbox() {
     var $dropbox = $("#dropbox");
+    var drop = document.getElementById("dropbox");
 
     // On drag enter...
     $dropbox.on("dragenter", function(e) {
@@ -168,7 +197,8 @@ function initDropbox() {
         handleFiles(files);
 
         // Update the display to acknowledge the number of pending files.
-        $dropbox.text(PENDING_FILES.length + " files ready for upload!");
+        // $dropbox.text(PENDING_FILES.length + "files ready for upload!");
+        drop.innerHTML = '<p class="text-success" align="center">' + PENDING_FILES.length + ' files ready for upload';
     });
 
     // If the files are dropped outside of the drop zone, the browser will

@@ -1,17 +1,19 @@
 body {
-    background-color: #4F4F4F;
-    font-family: Verdana,Arial,Helvetica,sans-serif;
-    font-size: small;
+    background-color: #000000;
+    /* font-family: Verdana,Arial,Helvetica,sans-serif; */
+    /* font-size: small; */
     color: #000000;
 }
 
+
 #dropbox {
-    border: 2px dashed #000000;
-    padding: 20px;
+    border: 2px dashed #0000FF;
+    border-radius: 5px; 
+    background: white;
 }
 
 #dropbox.active {
-    border: 4px dashed #FF0000;
+    border: 2px solid #0000FF;
 }
 
 .progress-trough {

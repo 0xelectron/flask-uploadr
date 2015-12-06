@@ -6,29 +6,47 @@
             <h3 class="panel-title">Upload Recent Satsang Audio</h3>
         </div>
         <div class="panel-body">
-            <form id="upload-form" action="{{ url_for('upload',audio='recent_satsang') }}" method="POST" enctype="multipart/form-data">
-            
-                <strong>Files:</strong><br>
-                Select files OR drag them into the box below.
-                <input id="file-picker" type="file" name="file" accept="audio/*" multiple><p><br>
+            <form id="upload-form" name="myForm" action="{{ url_for('upload',audio='recent_satsang') }}" method="POST" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <div id="hidden">
+                        <label class="control-label" for="inputDefault">Playlists</label>
+                        <select id="playlist" name="playlist" class="form-control" required>
+                            <option value={{p_id}} selected="selected">{{p_title}}</option>
+                        </select>
+
+                        <label class="control-label" for="inputDefault">Tags</label>
+                        <input name="tag" type="text" class="form-control" id="inputDefault" value="&quot;Recent Satsang&quot;" required>
+                    </div>
+
+                    <label class="control-label" for="inputDefault">Files</label>
+                    <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple required>
+                </div>
                 
-                <div id="dropbox">
-                    Drag and Drop Files Here
-                </div><p>
-                
+                <h4>OR</h4>
+
+                <div id="dropbox" class="jumbotron">
+                    <p class="text-danger" align="center">Drag and Drop Files Here</p>
+                </div>
+
                 <fieldset id="progress" style="display: none">
                     <legend>Files Progress</legend>
-                    <div class="progress-trough">
+                    <div class="progress-trough progress progress-striped active">
                         <div id="progress-bar" class="progress-bar">0%</div>
                     </div>
                 </fieldset><p>
-                <br>
-                <a href="#" class="btn btn-danger">Export</a>
-                <input type="submit" class="btn btn-success " value="Upload" id="upload-button"><br><br>
+                <br><br>
+                <button id="upload-button" class="btn btn-primary start" type="submit">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Upload</span>
+                </button>
             </form>
         </div>
     </div>
 {% endblock %}
 {% block js %}
+    <script type="text/javascript">
+        document.getElementById("hidden").style.display = "none";
+    </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/uploadr.js') }}"></script>
 {% endblock %}

@@ -6,32 +6,39 @@
             <h3 class="panel-title">Upload Audio</h3>
         </div>
         <div class="panel-body">
-            <form id="upload-form" action="{{ url_for('upload',audio='tracks') }}" method="POST" enctype="multipart/form-data">
-            
-                Playlist:
-                <select id="playlist" name="playlist">
-                    <option>Choose a playlist</option>
-                    {% for id, p_title in p_dict.iteritems() %}
-                        <option value={{id}}>{{p_title}}</option>
-                    {% endfor %}
-                </select>
-                Tags: <input name="tag" type="text"><br><br>
-                <strong>Files:</strong><br>
-                Select files OR drag them into the box below.
-                <input id="file-picker" type="file" name="file" accept="audio/*" multiple><p>
+            <form id="upload-form" name="myForm" action="{{ url_for('upload',audio='tracks') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="control-label" for="inputDefault">Playlists</label>
+                    <select id="playlist" name="playlist" class="form-control" required>
+                        <option value="">Choose a playlist</option>
+                        {% for id, p_title in p_dict.iteritems() %}
+                            <option value={{id}}>{{p_title}}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label class="control-label" for="inputDefault">Tags</label>
+                    <input name="tag" type="text" class="form-control" id="inputDefault" placeholder="Multiword tags should be quoted in doublequotes.">
+
+                    <label class="control-label" for="inputDefault">Files</label>
+                    <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple required>
+                </div>
+
+                <h4>OR</h4>
                 
-                <div id="dropbox">
-                    Drag and Drop Files Here
-                </div><p>
+                <div id="dropbox" class="jumbotron">
+                    <p class="text-danger" align="center">Drag and Drop Files Here</p>
+                </div>
                 
                 <fieldset id="progress" style="display: none">
                     <legend>Files Progress</legend>
-                    <div class="progress-trough">
+                    <div class="progress-trough progress progress-striped active">
                         <div id="progress-bar" class="progress-bar">0%</div>
                     </div>
-                </fieldset><p>
-                <a href="#" class="btn btn-danger">Export</a>
-                <input type="submit" class="btn btn-success " value="Upload" id="upload-button">
+                </fieldset><p><br><br>
+                <button id="upload-button" type="submit" class="btn btn-primary start">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Upload</span>
+                </button>
             </form>
         </div>
     </div>

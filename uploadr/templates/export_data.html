@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Export Data{% endblock %}
+{% block content %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Export Data</h3>
+        </div>
+        <div class="panel-body">
+            <form action="{{ url_for('export_data') }}" method="POST">
+                <div class="form-group">
+                    <label class="control-label" for="inputDefault">Playlists</label>
+                    <select id="playlist" name="playlist" class="form-control" required>
+                        <option value="">Choose a playlist</option>
+                        {% for id, p_title in p_dict.iteritems() %}
+                            <option value={{id}}>{{p_title}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="submit" class="btn btn-success" name="export-button" value="Export">
+            </form>
+        </div>
+    </div>
+{% endblock %}
