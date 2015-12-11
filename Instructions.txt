@@ -1,0 +1,5 @@
+Instructions for Basic setup. [python and pip required]
+1. Install requirements from requirements.txt
+2. Put the following things in uploadr/app.py
+    client_id, client_secret, username, password
+3. [optional] Configure runserver.py to select ip-address and port no.
