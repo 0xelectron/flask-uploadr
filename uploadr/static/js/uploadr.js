@@ -8,7 +8,7 @@ var UPLOAD_URL = window.location.href;
 var NEXT_URL   = "/files/";
         
 //Following files types will be added: audio/x-ms-wma,audio/mp3,audio/x-m4a,audio/flac
-var FILE_TYPES = ['audio/x-ms-wma','audio/mp3','audio/x-m4a','audio/flac'];
+var FILE_TYPES = ['audio/x-ms-wma','audio/mp3','audio/mpeg','audio/ogg','audio/x-m4a','audio/flac','audio/x-wav'];
 
 // List of pending files to handle when the Upload button is finally clicked.
 var PENDING_FILES  = [];
