@@ -56,12 +56,12 @@ function processing(ans){
     if (ans == "start"){
         document.getElementById("processing").style.visibility = "visible";
         document.getElementById("processing1").style.visibility = "visible";
-        $("#upload").fadeOut(500);
+        $("#upload").fadeOut("fast");
     }
     else{
         document.getElementById("processing").style.visibility = "hidden";
         document.getElementById("processing1").style.visibility = "hidden";
-        $("#upload").fadeIn(500);
+        $("#upload").fadeIn("fast");
     }
 }
 
