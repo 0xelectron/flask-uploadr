@@ -5,6 +5,7 @@ from flask_excel import make_response_from_array
 import calendar
 from dateutil import parser
 import os
+import shutil
 import json
 import glob
 from uuid import uuid4
@@ -12,8 +13,8 @@ from uuid import uuid4
 app = Flask(__name__)
 
 # Initializing an soundcloud user
-client = soundcloud.Client(client_id='YOUR CLIENT ID',
-                           client_secret='YOUR CLIENT SECRET',
+client = soundcloud.Client(client_id='YOUR CLIENT ID HERE',
+                           client_secret='YOUR CLIENT SECRET HERE',
                            username='USERNAME',
                            password='PASSWORD')
 
@@ -89,7 +90,7 @@ def upload(audio):
         # Get all playlists
         playlists = client.get('/me/playlists')
 
-        # Do we need to crearte tracks from or satsang audio?
+        # Do we need to crearte tracks or satsang audio upload form ?
         if audio == "tracks":
             p_dict = {}
             for playlist in playlists:
@@ -112,9 +113,9 @@ def upload(audio):
                 return render_template("satsang_upload.html", p_id=p_id, p_title=p_title)
             else:
                 # Didn't expect that.
-                return "Didn't Find any Recent Satsang playlist. Make Sure to create one."
+                return "<h1>Didn't Find any Recent Satsang playlist. Make Sure to create one.</h1>"
 
-        # He is lost Jarvis, He'll have to pay for it!
+        # He is lost Jarvis, let's tell him!
         else:
             abort(404)
 
@@ -135,6 +136,9 @@ def upload_complete(uuid):
     for file in glob.glob("{}/*.*".format(root)):
         fname = file.split("/")[-1]
         files.append(fname)
+
+    # Clean up our Home
+    shutil.rmtree(root)
 
     # All set to go, Mitchel!
     return render_template("files.html",
@@ -180,7 +184,7 @@ def export_data():
             xls_data.append([filename,track['id'],track['playback_count'],track['created_at']])
 
         # We Made it, shaun!
-        return make_response_from_array(xls_data, 'csv')        # Send CSV
+        return make_response_from_array(xls_data, "csv")        # Send CSV
 
     # We got GET here, shaun!
     else:

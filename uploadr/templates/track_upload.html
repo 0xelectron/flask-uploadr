@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Upload Audio {% endblock %}
 {% block content %}
+    <div id="processing">
+        <img src="{{ url_for('static', filename='img/processing.gif') }}" alt="Uploading..."/>
+    </div>
+
+    <div id="processing1" class="progress-trough progress progress-striped active">
+        <div id="progress-bar" class="progress-bar">0%</div>
+    </div>
+
+    <div id="upload">
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h3 class="panel-title">Upload Audio</h3>
@@ -28,13 +37,7 @@
                 <div id="dropbox" class="jumbotron">
                     <p class="text-danger" align="center">Drag and Drop Files Here</p>
                 </div>
-                
-                <fieldset id="progress" style="display: none">
-                    <legend>Files Progress</legend>
-                    <div class="progress-trough progress progress-striped active">
-                        <div id="progress-bar" class="progress-bar">0%</div>
-                    </div>
-                </fieldset><p><br><br>
+
                 <button id="upload-button" type="submit" class="btn btn-primary start">
                     <i class="glyphicon glyphicon-upload"></i>
                     <span>Upload</span>
@@ -42,6 +45,7 @@
             </form>
         </div>
     </div>
+</div>
 {% endblock %}
 {% block js %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/uploadr.js') }}"></script>

@@ -5,6 +5,23 @@ body {
     color: #000000;
 }
 
+#processing1 {
+    visibility:hidden;
+    position: absolute;
+    margin:auto;
+    width: 1150px;
+    top: 55%;
+    left:20%;
+}
+#processing {
+    visibility:hidden;
+    position: absolute;
+    height:64px;
+    width:64px;
+    margin: -60px -50px;
+    top: 50%;
+    left:50%;
+}
 
 #dropbox {
     border: 2px dashed #0000FF;

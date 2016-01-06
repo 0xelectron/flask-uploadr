@@ -30,7 +30,7 @@ $(document).ready(function() {
         // just POST to the upload endpoint directly. However, with JS we'll do
         // the POST using ajax and then redirect them ourself when done.
         
-        // e.preventDefault();
+        //e.preventDefault();
         validateForm(e);
     })
 });
@@ -51,8 +51,22 @@ function validateForm(e) {
     }
 }
 
+function processing(ans){
+
+    if (ans == "start"){
+        document.getElementById("processing").style.visibility = "visible";
+        document.getElementById("processing1").style.visibility = "visible";
+        $("#upload").fadeOut(500);
+    }
+    else{
+        document.getElementById("processing").style.visibility = "hidden";
+        document.getElementById("processing1").style.visibility = "hidden";
+        $("#upload").fadeIn(500);
+    }
+}
+
 function doUpload() {
-    $("#progress").show();
+    // $("#progress").show();
     var $progressBar   = $("#progress-bar");
 
     // Gray out the form.
@@ -72,6 +86,8 @@ function doUpload() {
 
     // Inform the back-end that we're doing this over ajax.
     fd.append("__ajax", "true");
+
+    processing("start");
 
     var xhr = $.ajax({
         xhr: function() {
@@ -101,6 +117,7 @@ function doUpload() {
         success: function(data) {
             $progressBar.css({"width": "100%"});
             data = JSON.parse(data);
+            processing("stop");
 
             // How'd it go?
             if (data.status === "error") {
