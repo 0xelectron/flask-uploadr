@@ -1,16 +1,20 @@
 # flask-uploadr
 import soundcloud
 from flask import Flask, request, redirect, url_for, render_template,abort
-from flask_excel import make_response_from_array
+from flask.ext import excel
+import pyexcel.ext.xlsx
 import calendar
 from dateutil import parser
 import os
+import sys
 import shutil
 import json
 import glob
 from uuid import uuid4
 
 app = Flask(__name__)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Initializing an soundcloud user
 client = soundcloud.Client(client_id='YOUR CLIENT ID HERE',
@@ -49,10 +53,17 @@ def upload(audio):
             is_ajax = True
 
         # Target folder for these uploads.
-        target = "uploadr/static/uploads/{}".format(upload_key)
+        target = os.path.join(BASE_DIR,"static","uploads",upload_key)
+
         try:
+            # try to create temporary directory
             os.mkdir(target)
-        except:
+
+        except Exception as e:
+
+            # Show that something bad happened here! probably wasn't able to create directory
+            sys.stderr.write("Error Occurred:" + e)
+
             if is_ajax:
                 return ajax_response(False, "Couldn't create upload directory: {}".format(target))
             else:
@@ -60,13 +71,12 @@ def upload(audio):
 
         # Save files to disk.
         for upload in request.files.getlist("file"):
-            filename = upload.filename.rsplit("/")[0]
-            destination = "/".join([target, filename])
+            destination = os.path.join(target, upload.filename)
             upload.save(destination)
 
             # upload audio file to soundcloud
             track = client.post('/tracks',track={
-                'title': filename,
+                'title': upload.filename,
                 'asset_data': open(destination,'rb'),
                 'tag_list':tags,
                 })
@@ -127,15 +137,13 @@ def upload_complete(uuid):
     """The location we send them to at the end of the upload."""
 
     # Get their files.
-    root = "uploadr/static/uploads/{}".format(uuid)
-    if not os.path.isdir(root):
-        return "Error: UUID not found!"
+    root = os.path.join(BASE_DIR,"static","uploads",str(uuid))
 
-    # Extract name from file address
-    files = []
-    for file in glob.glob("{}/*.*".format(root)):
-        fname = file.split("/")[-1]
-        files.append(fname)
+    if not os.path.isdir(root):
+        return "<h1>Error: UUID not found!</h1>"
+
+    # Generate list of file currently uploaded
+    files = [f for f in os.listdir(root)]
 
     # Clean up our Home
     shutil.rmtree(root)
@@ -184,7 +192,7 @@ def export_data():
             xls_data.append([filename,track['id'],track['playback_count'],track['created_at']])
 
         # We Made it, shaun!
-        return make_response_from_array(xls_data, "csv")        # Send CSV
+        return excel.make_response_from_array(xls_data, "xlsx")        # Send CSV
 
     # We got GET here, shaun!
     else:

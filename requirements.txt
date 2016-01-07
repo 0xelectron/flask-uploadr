@@ -3,11 +3,14 @@ Flask-Excel==0.0.3
 fudge==1.1.0
 future==0.15.2
 itsdangerous==0.24
+jdcal==1.2
 Jinja2==2.8
 MarkupSafe==0.23
+openpyxl==2.2.2
 pyexcel==0.1.7
 pyexcel-io==0.0.8
 pyexcel-webio==0.0.4
+pyexcel-xlsx==0.0.9
 python-dateutil==2.4.2
 requests==2.8.1
 simplejson==3.8.1

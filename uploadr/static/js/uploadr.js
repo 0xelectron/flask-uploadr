@@ -67,13 +67,13 @@ function processing(ans){
 
 function doUpload() {
     // $("#progress").show();
-    var $progressBar   = $("#progress-bar");
+    // var $progressBar   = $("#progress-bar");
 
     // Gray out the form.
     $("#upload-form :input").attr("disabled", "disabled");
 
     // Initialize the progress bar.
-    $progressBar.css({"width": "0%"});
+    // $progressBar.css({"width": "0%"});
 
     // Collect the form data.
     fd = collectFormData();
@@ -102,8 +102,8 @@ function doUpload() {
                     }
 
                     // Set the progress bar.
-                    $progressBar.css({"width": percent + "%"});
-                    $progressBar.text(percent + "%");
+                    // $progressBar.css({"width": percent + "%"});
+                    // $progressBar.text(percent + "%");
                 }, false)
             }
             return xhrobj;
@@ -115,7 +115,7 @@ function doUpload() {
         cache: false,
         data: fd,
         success: function(data) {
-            $progressBar.css({"width": "100%"});
+            // $progressBar.css({"width": "100%"});
             data = JSON.parse(data);
             processing("stop");
 
