@@ -27,10 +27,13 @@
                     </select>
 
                     <label class="control-label" for="inputDefault">Tags</label>
-                    <input name="tag" type="text" class="form-control" id="inputDefault" placeholder="Multiword tags should be quoted in doublequotes.">
+                    <input name="tag" type="text" class="form-control" id="inputDefault" placeholder="Multiword tags should be quoted in doublequotes."><br>
 
-                    <label class="control-label" for="inputDefault">Files</label>
-                    <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple required>
+                    <input type="checkbox" name="downloadable" value="true">  Downloadable? <br><br>
+                    <label>
+                        Files
+                        <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple required>
+                    </label>
                 </div>
 
                 <h4>OR</h4>

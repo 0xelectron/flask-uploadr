@@ -5,22 +5,43 @@ from flask.ext import excel
 import pyexcel.ext.xlsx
 import calendar
 from dateutil import parser
+from collections import OrderedDict
 import os
 import sys
 import shutil
 import json
-import glob
 from uuid import uuid4
 
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Playlists per page
+page_size = 70
+
 # Initializing an soundcloud user
 client = soundcloud.Client(client_id='YOUR CLIENT ID HERE',
                            client_secret='YOUR CLIENT SECRET HERE',
                            username='USERNAME',
                            password='PASSWORD')
+def get_lists(url, ltype='playlists'):
+
+    if ltype == 'playlists':
+        playlists = []
+        temp_playlists = client.get(url, limit=page_size,
+                            linked_partitioning=1, representation='compact')
+        while(True):
+            for playlist in temp_playlists.collection:
+                playlists.append(playlist)
+
+            if hasattr(temp_playlists,'next_href'):
+                temp_playlists = client.get(temp_playlists.next_href)
+            else:
+                break
+
+        return playlists
+    else:
+        raise ValueError('The function yet doesn\'t know to extract lists other the playlists.')
 
 # HomePage
 @app.route("/")
@@ -37,9 +58,10 @@ def upload(audio):
 
         tracks = []
 
-        tags = form.get("tag")                          # Get tags
-        t_p = form.get("playlist")                      # Get playlist id
-        n_p = client.get('/playlists/'+str(t_p))        # Create url for playlist
+        tags = form.get("tag")                            # Get tags
+        dbool = form.get("downloadable")                  # Get Checkbox
+        pid = form.get("playlist")                        # Get playlist id
+        n_p = client.get('/playlists/'+str(pid))          # Get playlist
 
         for track in n_p.tracks:
             tracks.append({'id':track['id']})           # Get previous tracks of playlist.
@@ -62,7 +84,7 @@ def upload(audio):
         except Exception as e:
 
             # Show that something bad happened here! probably wasn't able to create directory
-            sys.stderr.write("Error Occurred:" + e)
+            sys.stderr.write("Error Occurred:" + str(e))
 
             if is_ajax:
                 return ajax_response(False, "Couldn't create upload directory: {}".format(target))
@@ -74,11 +96,15 @@ def upload(audio):
             destination = os.path.join(target, upload.filename)
             upload.save(destination)
 
+            if not dbool:
+                dbool = False
+
             # upload audio file to soundcloud
             track = client.post('/tracks',track={
                 'title': upload.filename,
                 'asset_data': open(destination,'rb'),
                 'tag_list':tags,
+                'downloadable':dbool,
                 })
 
             # Append track to playlist
@@ -98,31 +124,28 @@ def upload(audio):
 
         # hmmm! Got an GET Request.
         # Get all playlists
-        playlists = client.get('/me/playlists')
+        playlists = get_lists('/me/playlists')
 
-        # Do we need to crearte tracks or satsang audio upload form ?
         if audio == "tracks":
             p_dict = {}
             for playlist in playlists:
-                if not playlist.title == "Recent Satsang":
-                    p_dict[playlist.id] = playlist.title
-            return render_template("track_upload.html", p_dict=p_dict,)
+                p_dict[playlist.id] = playlist.title
+            sp_dict = OrderedDict(sorted(p_dict.items(),key=lambda t: t[1]))
+            return render_template("track_upload.html", p_dict=sp_dict,)
 
-        # We got GET to upload satsang audio. Prepare for it.
+        # Create form to upload satsang audio.
         elif audio == "recent_satsang":
-            p_id = None
-            p_title = None
+            rc_id = None
+            rc_title = None
             for playlist in playlists:
-                if playlist.title == "Recent Satsang":
-                    p_id=playlist.id
-                    p_title=playlist.title
+                if playlist.title == "RecentSatsang":
+                    rc_id=playlist.id
+                    rc_title=playlist.title
                     break
 
-            # Did all go well?
-            if p_id:
-                return render_template("satsang_upload.html", p_id=p_id, p_title=p_title)
+            if rc_id:
+                return render_template("satsang_upload.html", rc_id=rc_id, rc_title=rc_title)
             else:
-                # Didn't expect that.
                 return "<h1>Didn't Find any Recent Satsang playlist. Make Sure to create one.</h1>"
 
         # He is lost Jarvis, let's tell him!
@@ -167,9 +190,9 @@ def export_data():
         t_data = {}
         xls_data = [['Track Name','Track ID','Play Count','Created At']]
 
-        # Once Again! Get playlists
-        t_p = form.get("playlist")
-        n_p = client.get('/playlists/'+str(t_p))
+        # Get Playlist Details
+        pid = form.get("playlist")
+        n_p = client.get('/playlists/'+str(pid))
 
         # Prepare data for sort
         for i, track in enumerate(n_p.tracks):
@@ -196,16 +219,19 @@ def export_data():
 
     # We got GET here, shaun!
     else:
-        # Once Again! Get Playlist.
-        p_dict = {}
-        playlists = client.get('/me/playlists')
+        # Get all playlists
+        playlists = get_lists('/me/playlists/')
 
-        # Prepare form
+        # Create form to upload  tracks.
+        p_dict = {}
         for playlist in playlists:
             p_dict[playlist.id] = playlist.title
 
+        # Sort the Playlist Dict.
+        sp_dict = OrderedDict(sorted(p_dict.items(),key=lambda t: t[1]))
+
         # He's waiting for form, shaun!
-        return render_template("export_data.html", p_dict=p_dict)
+        return render_template("export_data.html", p_dict=sp_dict)
 
 # I'm Mickey!
 def ajax_response(status, msg):
