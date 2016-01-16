@@ -148,7 +148,7 @@ def upload(audio):
             p_dict = {}
             for playlist in playlists:
                 p_dict[playlist.id] = playlist.title
-            sp_dict = OrderedDict(sorted(p_dict.items(),key=lambda t: t[1]))
+            sp_dict = OrderedDict(sorted(p_dict.items(),key=lambda t: t[1].lower()))
             return render_template("track_upload.html", p_dict=sp_dict,)
 
         # Create form to upload satsang audio.
@@ -232,7 +232,7 @@ def export_data():
 
         # Sort Data in desecnding
         # timestamps.sort(reverse=True)
-        tids.sort(reverse=True)
+        sorted(tids, key=lambda s: s.lower())
 
         # join Data for CSV
         for tid in tids:
@@ -268,7 +268,7 @@ def export_data():
             p_dict[playlist.id] = playlist.title
 
         # Sort the Playlist Dict.
-        sp_dict = OrderedDict(sorted(p_dict.items(),key=lambda t: t[1]))
+        sp_dict = OrderedDict(sorted(p_dict.items(),key=lambda t: t[1].lower()))
 
         # He's waiting for form, shaun!
         return render_template("export_data.html", p_dict=sp_dict)
@@ -290,3 +290,5 @@ def html_response(msg):
     """.format(msg)
     return response
 
+# if __name__ == "__main__":
+#     app.run()
