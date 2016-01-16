@@ -24,6 +24,7 @@ client = soundcloud.Client(client_id='YOUR CLIENT ID HERE',
                            client_secret='YOUR CLIENT SECRET HERE',
                            username='USERNAME',
                            password='PASSWORD')
+
 def get_lists(url, ltype='playlists'):
 
     if ltype == 'playlists':
@@ -61,18 +62,23 @@ def upload(audio):
         tags = form.get("tag")                            # Get tags
         dbool = form.get("downloadable")                  # Get Checkbox
         pid = form.get("playlist")                        # Get playlist id
-        n_p = client.get('/playlists/'+str(pid))          # Get playlist
+        n_playlist = form.get("n_playlist")               # Try to Get new playlist
 
-        for track in n_p.tracks:
-            tracks.append({'id':track['id']})           # Get previous tracks of playlist.
-
-        # Create a unique "session ID" for this particular batch of uploads.
-        upload_key = str(uuid4())
 
         # Is the upload using Ajax, or a direct POST by the form?
         is_ajax = False
         if form.get("__ajax", None) == "true":
             is_ajax = True
+
+        """ We only need one of the two fields, not Both. Check about that!"""
+        if (n_playlist and pid != "None") or ((not n_playlist) and pid == "None"):
+            if is_ajax:
+                return ajax_response(False, "You need to either select playlist or enter new playlist title. Not Both or None")
+            else:
+                return html_response("You need to either select playlist or enter new playlist title. Not Both or None")
+
+        # Create a unique "session ID" for this particular batch of uploads.
+        upload_key = str(uuid4())
 
         # Target folder for these uploads.
         target = os.path.join(BASE_DIR,"static","uploads",upload_key)
@@ -110,10 +116,22 @@ def upload(audio):
             # Append track to playlist
             tracks.append({'id':track.id})
 
-        # Send tracks to playlist
-        client.put(n_p.uri, playlist={
-            'tracks':tracks
-        })
+        """ Get Previous tracks of the playlist and update the playlist."""
+        if (pid != "None" and (not n_playlist)):
+            n_p = client.get('/playlists/'+str(pid))        # Get playlist
+            for track in n_p.tracks:
+                tracks.append({'id':track['id']})           # Get previous tracks of playlist.
+
+            client.put(n_p.uri, playlist={                  # Update Playlist
+                'tracks':tracks
+            })
+
+        else:
+            client.post("/playlists",playlist={
+                'title': n_playlist,
+                'sharing':'private',
+                'tracks':tracks,
+            })
 
         # All good jarvis!
         if is_ajax:
@@ -138,7 +156,7 @@ def upload(audio):
             rc_id = None
             rc_title = None
             for playlist in playlists:
-                if playlist.title == "RecentSatsang":
+                if (playlist.title).lower().replace(" ","") == "recentsatsang":
                     rc_id=playlist.id
                     rc_title=playlist.title
                     break
@@ -146,7 +164,8 @@ def upload(audio):
             if rc_id:
                 return render_template("satsang_upload.html", rc_id=rc_id, rc_title=rc_title)
             else:
-                return "<h1>Didn't Find any Recent Satsang playlist. Make Sure to create one.</h1>"
+                return html_response("""Didn't Find any Recent Satsang playlist. Make Sure to create one or
+                        Check for any typo!""")
 
         # He is lost Jarvis, let's tell him!
         else:
@@ -186,33 +205,54 @@ def export_data():
 
         form = request.form
         # We will need friends
-        timestamps = []
+        # timestamps = []
+        tids = []
         t_data = {}
-        xls_data = [['Track Name','Track ID','Play Count','Created At']]
+        # xls_data = [['Track Name','Track ID','Playback count','Created At']]
+
+        xls_data = [['Track Name','Track ID','Playback count','Duration']]
 
         # Get Playlist Details
         pid = form.get("playlist")
         n_p = client.get('/playlists/'+str(pid))
 
         # Prepare data for sort
-        for i, track in enumerate(n_p.tracks):
-            timestamp = calendar.timegm(parser.parse(track['created_at']).timetuple())
-            if not timestamp in timestamps:
-                timestamps.append(timestamp)
-                t_data[timestamp] = track
-            else:
-                timestamp += i;
-                timestamps.append(timestamp)
-                t_data[timestamp] = track
+        for track in n_p.tracks:
+            tids.append(track['id'])
+            t_data[track['id']] = track
+        # for i, track in enumerate(n_p.tracks):
+        #     timestamp = calendar.timegm(parser.parse(track['created_at']).timetuple())
+        #     if not timestamp in timestamps:
+        #         timestamps.append(timestamp)
+        #         t_data[timestamp] = track
+        #     else:
+        #         timestamp += i;
+        #         timestamps.append(timestamp)
+        #         t_data[timestamp] = track
 
         # Sort Data in desecnding
-        timestamps.sort(reverse=True)
+        # timestamps.sort(reverse=True)
+        tids.sort(reverse=True)
 
         # join Data for CSV
-        for timestamp in timestamps:
-            track = t_data[timestamp]
+        for tid in tids:
+            track = t_data[tid]
+            try:
+                trackid = str(track['id']) + "|" +  str(track['secret_token'])
+            except KeyError:
+                trackid = str(track['id']) + "|"
+            except Exception as e:
+                sys.stderr.write("Error Ocurred while preparing for excel sheet: %s".format(e))
+                trackid = str(track['id']) + "|"
+
             filename, extension = os.path.splitext(track['title'])
-            xls_data.append([filename,track['id'],track['playback_count'],track['created_at']])
+            xls_data.append([filename,trackid,track['playback_count'],track['duration']])
+
+        # for timestamp in timestamps:
+        #     track = t_data[timestamp]
+        #     tid = str(track['id']) + "|" +  str(track['secret_token'])
+        #     filename, extension = os.path.splitext(track['title'])
+        #     xls_data.append([filename,tid,track['playback_count'],track['created_at']])
 
         # We Made it, shaun!
         return excel.make_response_from_array(xls_data, "xlsx")        # Send CSV
@@ -243,4 +283,10 @@ def ajax_response(status, msg):
         status=status_code,
         msg=msg,
     ))
+
+def html_response(msg):
+    response = """
+    <strong>Oh snap!</strong><p>{}</p><a href="/"><h3>Home</h3></a>
+    """.format(msg)
+    return response
 

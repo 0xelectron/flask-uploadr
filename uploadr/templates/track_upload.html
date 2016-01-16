@@ -21,10 +21,14 @@
                     <label class="control-label" for="inputDefault">Playlists</label>
                     <select id="playlist" name="playlist" class="form-control" required>
                         <option value="">Choose a playlist</option>
+                        <option selected="selected" value="None">None</option>
                         {% for id, p_title in p_dict.iteritems() %}
                             <option value={{id}}>{{p_title}}</option>
                         {% endfor %}
                     </select>
+                    <h4 align="center">OR</h4>
+                    <label class="control-label" for="inputDefault">New Playlist</label>
+                    <input name="n_playlist" type="text" class="form-control" id="inputDefault" placeholder="Enter the title of the New Playlist."><br>
 
                     <label class="control-label" for="inputDefault">Tags</label>
                     <input name="tag" type="text" class="form-control" id="inputDefault" placeholder="Multiword tags should be quoted in doublequotes."><br>
