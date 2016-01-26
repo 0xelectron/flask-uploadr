@@ -20,10 +20,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 page_size = 70
 
 # Initializing an soundcloud user
-client = soundcloud.Client(client_id='YOUR CLIENT ID HERE',
-                           client_secret='YOUR CLIENT SECRET HERE',
-                           username='USERNAME',
-                           password='PASSWORD')
+try:
+    client = soundcloud.Client(client_id='YOUR CLIENT ID HERE',
+                               client_secret='YOUR CLIENT SECRET HERE',
+                               username='USERNAME',
+                               password='PASSWORD')
+except Exception as e:
+    sys.stderr.write("Error Occured: {}".format(e))
 
 def get_lists(url, ltype='playlists'):
 
@@ -89,9 +92,8 @@ def upload(audio):
             os.mkdir(target)
 
         except Exception as e:
-
             # Show that something bad happened here! probably wasn't able to create directory
-            sys.stderr.write("Error Occurred:" + str(e))
+            sys.stderr.write("Error Occured: {}".format(e))
 
             if is_ajax:
                 return ajax_response(False, "Couldn't create upload directory: {}".format(target))
@@ -108,34 +110,46 @@ def upload(audio):
             if not sharing:
                 sharing = "private"
 
-            # upload audio file to soundcloud
-            track = client.post('/tracks',track={
-                'title': os.path.splitext(upload.filename)[0],
-                'asset_data': open(destination,'rb'),
-                'tag_list':tags,
-                'downloadable':dbool,
-                'sharing':sharing,
-                })
+            try:
+                # upload audio file to soundcloud
+                track = client.post('/tracks',track={
+                    'title': os.path.splitext(upload.filename)[0],
+                    'asset_data': open(destination,'rb'),
+                    'tag_list':tags,
+                    'downloadable':dbool,
+                    'sharing':sharing,
+                    })
 
-            # Append track to playlist
-            tracks.append({'id':track.id})
+                # Append track to playlist
+                tracks.append({'id':track.id})
+
+            except Exception as e:
+                sys.stderr.write("Error Occured: {}".format(e))
 
         """ Get Previous tracks of the playlist and update the playlist."""
         if (pid != "None" and (not n_playlist)):
-            n_p = client.get('/playlists/'+str(pid))        # Get playlist
-            for track in n_p.tracks:
-                tracks.append({'id':track['id']})           # Get previous tracks of playlist.
+            try:
+                n_p = client.get('/playlists/'+str(pid))        # Get playlist
+                for track in n_p.tracks:
+                    tracks.append({'id':track['id']})           # Get previous tracks of playlist.
 
-            client.put(n_p.uri, playlist={                  # Update Playlist
-                'tracks':tracks
-            })
+                client.put(n_p.uri, playlist={                  # Update Playlist
+                    'tracks':tracks
+                })
+
+            except Exception as e:
+                sys.stderr.write("Error Occured: {}".format(e))
 
         else:
-            client.post("/playlists",playlist={
-                'title': n_playlist,
-                'sharing':'private',
-                'tracks':tracks,
-            })
+            try:
+                client.post("/playlists",playlist={
+                    'title': n_playlist,
+                    'sharing':'private',
+                    'tracks':tracks,
+                })
+
+            except Exception as e:
+                sys.stderr.write("Error Occured: {}".format(e))
 
         # All good jarvis!
         if is_ajax:
