@@ -60,9 +60,10 @@ def upload(audio):
         tracks = []
 
         tags = form.get("tag")                            # Get tags
-        dbool = form.get("downloadable")                  # Get Checkbox
+        dbool = form.get("downloadable")                  # Get Downloadable status
+        sharing = form.get("public")                      # Get Sharing status
         pid = form.get("playlist")                        # Get playlist id
-        n_playlist = form.get("n_playlist")               # Try to Get new playlist
+        n_playlist = form.get("n_playlist")               # Try to Get new playlis
 
 
         # Is the upload using Ajax, or a direct POST by the form?
@@ -104,13 +105,16 @@ def upload(audio):
 
             if not dbool:
                 dbool = False
+            if not sharing:
+                sharing = "private"
 
             # upload audio file to soundcloud
             track = client.post('/tracks',track={
-                'title': upload.filename,
+                'title': os.path.splitext(upload.filename)[0],
                 'asset_data': open(destination,'rb'),
                 'tag_list':tags,
                 'downloadable':dbool,
+                'sharing':sharing,
                 })
 
             # Append track to playlist

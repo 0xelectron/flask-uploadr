@@ -3,7 +3,7 @@
  ******************************************************************************/
 
 // Constants
-var MAX_UPLOAD_FILE_SIZE = 1024*1024*250; // 250 MB
+var MAX_UPLOAD_FILE_SIZE = 1024*1024*1024*5; // 5 GB
 var UPLOAD_URL = window.location.href;
 var NEXT_URL   = "/files/";
         
