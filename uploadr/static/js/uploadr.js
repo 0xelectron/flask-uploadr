@@ -33,17 +33,43 @@ $(document).ready(function() {
         //e.preventDefault();
         validateForm(e);
     })
+    $("#export-button").on("click",function(e){
+        var x = document.forms["myForm"]["playlist"].value;
+        if (!x || x == "None"){
+            alert("You need to Select Playlist.");
+            e.preventDefault()
+            return;
+        }
+    });
 });
 function validateForm(e) {
     var upload = true;
     var x = document.forms["myForm"]["playlist"].value;
-    if (x == null || x == "") {
-        alert("Need Playlist");
-        upload = false;
+    var y;
+    try{
+        y = document.forms["myForm"]["n_playlist"].value;
     }
+    catch(err){
+        y = null;
+    }
+    if (!(!x || x == "None") && !(!y || y == "")){
+        alert("You need to either select playlist or enter new playlist title to create playlist. Not Both");
+        e.preventDefault();
+        upload = false;
+        return;
+    }
+    if ((!x || x == "None") && (!y || y == "")){
+        alert("You need to either select playlist or enter new playlist title to create playlist. Not None");
+        e.preventDefault();
+        upload = false;
+        return;
+    }
+
     if (PENDING_FILES.length == 0 && upload == true){
         alert("You may want to add files!");
+        e.preventDefault();
         upload = false;
+        return;
     }
     if (upload == true){
         e.preventDefault();

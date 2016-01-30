@@ -29,7 +29,7 @@
                     </div>
 
                     <label class="control-label" for="inputDefault">Files</label>
-                    <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple required>
+                    <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple>
                 </div>
                 
                 <h4>OR</h4>
@@ -38,10 +38,8 @@
                     <p class="text-danger" align="center">Drag and Drop Files Here</p>
                 </div>
 
-                <button id="upload-button" class="btn btn-primary start" type="submit">
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>Upload</span>
-                </button>
+                <input id="upload-button" class="btn btn-primary start" type="submit" name="submit" value="Upload">
+                <input id="export-button" class="btn btn-primary start" type="submit" name="submit" value="Export">
             </form>
         </div>
     </div>
