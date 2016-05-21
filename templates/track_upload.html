@@ -1,40 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Upload Audio {% endblock %}
+{% block title %} Upload Audio {% endblock %}
 {% block content %}
 
-    <div class="col-md-4" id="processing">
-        <img src="{{ url_for('static', filename='img/processing.gif') }}" alt="Uploading..."/>
-    </div>
-
-    <div class="col-md-4" id="processing1">
-        <h3 class="text-primary"> Uploading... </h3>
-    </div>
-
-    <div id="upload">
+<div id="upload">
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h3 class="panel-title">Upload Audio</h3>
         </div>
         <div class="panel-body">
-            <form id="upload-form" name="myForm" action="{{ url_for('upload',audio='tracks') }}" method="POST" enctype="multipart/form-data">
+            <form id="uploadForm" name="uploadForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <label class="control-label" for="inputDefault">Playlists</label>
                     <select id="playlist" name="playlist" class="form-control" required>
                         <option value="">Choose a playlist</option>
                         <option selected="selected" value="None">None</option>
-                        {% for id, p_title in p_dict.iteritems() %}
-                            <option value={{id}}>{{p_title}}</option>
-                        {% endfor %}
                     </select>
                     <h4 align="center">OR</h4>
                     <label class="control-label" for="inputDefault">New Playlist</label>
-                    <input name="n_playlist" type="text" class="form-control" id="inputDefault" placeholder="Enter the title of the New Playlist."><br>
+                    <input id="n_playlist" name="n_playlist" type="text" class="form-control" placeholder="Enter the title of the New Playlist."><br>
 
                     <label class="control-label" for="inputDefault">Tags</label>
-                    <input name="tag" type="text" class="form-control" id="inputDefault" placeholder="Multiword tags should be quoted in doublequotes."><br>
+                    <input id="tags" name="tags" type="text" class="form-control" id="inputDefault" placeholder="Multiword tags should be quoted in doublequotes."><br>
 
-                    <input type="checkbox" name="downloadable" value="true">  Downloadable? <br><br>
-                    <input type="checkbox" name="public" value="public">  Public? <br><br>
+                    <input id="downloadable" type="checkbox" name="downloadable" value="true">  Downloadable? <br><br>
+                    <input id="public" type="checkbox" name="public" value="public">  Public? <br><br>
                     <label>
                         Files
                         <input id="file-picker" class="btn btn-default"  type="file" name="file" accept="audio/*" multiple >
@@ -42,18 +31,23 @@
                 </div>
 
                 <h4>OR</h4>
-                
                 <div id="dropbox" class="jumbotron">
                     <p class="text-danger" align="center">Drag and Drop Files Here</p>
                 </div>
-
+                <div id="progress" class="progress progress-striped active">
+                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
                 <input id="upload-button" class="btn btn-primary start" type="submit" name="submit" value="Upload">
                 <input id="export-button" class="btn btn-primary start" type="submit" name="submit" value="Export">
+                <button id="connect" class="btn btn-danger" onclick="connectToSoundCloud()">Connect to Soundcloud</button>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
 {% block js %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/selectize.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/simple-excel.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/soundcloud.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/uploadr.js') }}"></script>
 {% endblock %}
