@@ -1,6 +1,6 @@
 /******************************************************************************
  * soundcloud-uploadr                                                         *
- * Copyright (c) 2016 0xelectron                                              * 
+ * Copyright (c) 2016 0xelectron                                              *
  ******************************************************************************/
 
 // Max size
@@ -14,8 +14,8 @@ var PAGE_SIZE = 75;
 
 // Parameters for Soundcloud Initialize
 var PARAMS = {
-        client_id: 'YOUR_CLIENT_ID',
-        redirect_uri: 'YOUR_CALLBACK_URL_AS_IN_YOUR_APP',
+        // client_id: 'YOUR_CLIENT_ID',
+        // redirect_uri: 'YOUR_CALLBACK_URL_AS_IN_YOUR_APP',
         oauth_token: localStorage.getItem('oauth_token') || undefined,
         scope: 'non-expiring',
 };
@@ -112,29 +112,27 @@ $(document).ready(function() {
     });
 });
 
-// function to check soundcloud connection.
-function checkConnection(){
-    // Make sure we really are.
-    SC.get("me").then( ( me ) => {
-        console.info( "Logged in!" );
-        $("#connect").hide();
-    }, ( err ) => {
-        console.error('Problem logging in: %o', err);
-        // Is oauth token expired?
-        if (err.status === 401) {
-            localStorage.clear();
-            window.location.reload();
-            connectToSoundcloud();
-        } else {
-            throw err;
-        }
-    }).catch( (err) => {
-        alert("Error: " + err.message + " ! Check console for more info.");
-        console.log("Error occured during Connecting to soundcloud. Try refreshing!");
-        console.log(err);
-        localStorage.clear();
-    });
-};
+// // function to check soundcloud connection.
+// function checkConnection(){
+//     // Make sure we really are.
+//     SC.get("me").then( ( me ) => {
+//         console.info( "Logged in!" );
+//         $("#connect").hide();
+//     }, ( err ) => {
+//         console.error('Problem logging in: %o', err);
+//         // Is oauth token expired?
+//         if (err.status === 401) {
+//             window.location.reload();
+//             connectToSoundcloud();
+//         } else {
+//             throw err;
+//         }
+//     }).catch( (err) => {
+//         alert("Error: " + err.message + " ! Check console for more info.");
+//         console.log("Error occured during Connecting to soundcloud. Try refreshing!");
+//         console.log(err);
+//     });
+// };
 
 // function to connect to soundcloud.
 function connectToSoundcloud() {
@@ -155,7 +153,6 @@ function connectToSoundcloud() {
             console.error('Problem logging in: %o', err);
             // Is oauth token expired?
             if (err.status === 401) {
-                localStorage.clear();
                 window.location.reload();
             } else {
                 throw err;
@@ -165,7 +162,6 @@ function connectToSoundcloud() {
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during Connecting to soundcloud. Try refreshing!");
         console.log(err);
-        localStorage.clear();
     });
 };
 
@@ -178,7 +174,7 @@ function setupSoundcloud(){
     // Connect.
     if ( SC.isConnected() ) {
         $("#connect").hide();
-        checkConnection();
+        // checkConnection();
     }
     else {
         connectToSoundcloud();
@@ -288,6 +284,7 @@ function updatePlaylist ( pid, tracks ){
      // Catch any errors.
     }).then( ( e ) => {
         DROP.innerHTML = '<p class="text-danger" align="center"> Done';
+        window.location.reload()
     }).catch(function(err){
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during updating playlist");

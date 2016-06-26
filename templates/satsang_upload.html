@@ -34,9 +34,7 @@
             </div>
             <input id="upload-button" class="btn btn-primary start" type="submit" name="submit" value="Upload">
             <input id="export-button" class="btn btn-primary start" type="submit" name="submit" value="Export">
-            <div id="connect">
-                <button  class="btn btn-danger" onclick="connectToSoundCloud()">Connect to Soundcloud</button>
-            </div>
+            <button id="connect" class="btn btn-danger" onclick="connectToSoundCloud()">Connect to Soundcloud</button>
         </form>
     </div>
 </div>
@@ -44,6 +42,7 @@
 {% block js %}
     <script type="text/javascript">
         document.getElementById("hidden").style.display = "none";
+        localStorage.setItem('oauth_token', '{{ oauth_token }}');
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/selectize.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/simple-excel.js') }}"></script>

@@ -46,6 +46,9 @@
 </div>
 {% endblock %}
 {% block js %}
+    <script type="text/javascript">
+        localStorage.setItem('oauth_token', '{{ oauth_token }}');
+    </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/selectize.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/simple-excel.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/soundcloud.min.js') }}"></script>
