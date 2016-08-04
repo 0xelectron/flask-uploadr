@@ -1,6 +1,6 @@
 /******************************************************************************
  * soundcloud-uploadr                                                         *
- * Copyright (c) 2016 0xelectron                                              * 
+ * Copyright (c) 2016 0xelectron                                              *
  ******************************************************************************/
 
 // Max size
@@ -123,7 +123,7 @@ function checkConnection(){
         // Is oauth token expired?
         if (err.status === 401) {
             localStorage.clear();
-            window.location.reload();
+            window.location.reload(true);
             connectToSoundcloud();
         } else {
             throw err;
@@ -156,7 +156,7 @@ function connectToSoundcloud() {
             // Is oauth token expired?
             if (err.status === 401) {
                 localStorage.clear();
-                window.location.reload();
+                window.location.reload(true);
             } else {
                 throw err;
             }
@@ -259,6 +259,8 @@ function createPlaylist ( title, tracks ){
         // catch any errors.
     }).then( (e) =>{
         DROP.innerHTML = '<p class="text-danger" align="center"> Done';
+        // Reload after 3 seconds
+        setTimeout(window.location.reload(true), 3000);
     }).catch(function(err){
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during creating playlist");
@@ -288,6 +290,8 @@ function updatePlaylist ( pid, tracks ){
      // Catch any errors.
     }).then( ( e ) => {
         DROP.innerHTML = '<p class="text-danger" align="center"> Done';
+        // Reload after 3 seconds
+        setTimeout(window.location.reload(true), 3000);
     }).catch(function(err){
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during updating playlist");
