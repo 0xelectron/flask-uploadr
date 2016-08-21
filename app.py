@@ -6,7 +6,19 @@
 
 from flask import Flask, request, render_template, abort, session
 import soundcloud
+import logging
+import logging.handlers
 
+LOG_FILENAME = "uploadr_log.out"
+
+my_logger = logging.getLogger('UploadrLogger')
+my_logger.setLevel(logging.DEBUG)
+
+# Add the log message handler to the logger
+handler = logging.handlers.RotatingFileHandler(
+              LOG_FILENAME, maxBytes=10*1024*1024, backupCount=5)
+
+my_logger.addHandler(handler)
 
 app = Flask(__name__)
 
@@ -55,10 +67,21 @@ def upload(audio):
         abort(404)
 
 if __name__ == "__main__":
-    flask_options = dict(
-        host='localhost',
-        port=2006,
-        threaded=True,
-    )
+    # flask_options = dict(
+    #     host='localhost',
+    #     port=2006,
+    #     threaded=True,
+    # )
     app.secret_key = 'C(@WDiuTP796%yZH*zcfOssgvdifhYmZ'
-    app.run(**flask_options)
+    # app.run(**flask_options)
+
+    from gevent.wsgi import WSGIServer
+    address = "localhost", 2006
+    server = WSGIServer(address, app,
+        log=my_logger, error_log=my_logger)
+    try:
+        print("Server running on port %s:%d. Ctrl+C to quit" % address)
+        server.serve_forever()
+    except KeyboardInterrupt:
+        server.stop()
+        print("Bye bye")
