@@ -10,7 +10,7 @@ var MAX_UPLOAD_FILE_SIZE = 1024*1024*500; // 500 MB
 var URL = window.location.href;
 
 // Number of results per request.
-var PAGE_SIZE = 75;
+var PAGE_SIZE = 70;
 
 // Parameters for Soundcloud Initialize
 var PARAMS = {
@@ -381,16 +381,12 @@ function progress( e ){
 function exportData(e, pid ){
 
     e.preventDefault();
-    // write an csv file.
-    var csvWriter = new SimpleExcel.Writer.CSV();
-    var csvSheet = new SimpleExcel.Sheet();
-    var Cell = SimpleExcel.Cell;
+    csvRows = []
     var tids = [];
     var tData = {};
 
-    // insert new record.
-    csvSheet.insertRecord([new Cell('Track Name', 'TEXT'), new Cell('Track ID', 'TEXT'),
-            new Cell('Playback Count', 'TEXT'), new Cell('Duration', 'TEXT')]);
+    // insert header.
+    rowData = [['Track Name', 'Track ID', 'Playback Count', 'Duration']]
 
     // Get track Data
     SC.get('/playlists/' + pid).then(function(playlist) {
@@ -412,13 +408,26 @@ function exportData(e, pid ){
             if ( track.hasOwnProperty('secret_token') ) {
                 trackid += track['secret_token'];
             }
-            // insert new record
-            csvSheet.insertRecord([new Cell(track['title'], 'TEXT'), new Cell(trackid, 'TEXT'),
-            new Cell(track['playback_count'], 'NUMBER'), new Cell(track['duration'], 'NUMBER')]);
+            // insert new row
+            rowData.push([track['title'], trackid, track['playback_count'], track['duration']])
         }
 
-        csvWriter.insertSheet(csvSheet);
-        csvWriter.saveFile(); // pop! ("Save As" dialog appears)
+        // join rows
+        for (var i = 0, l = rowData.length; i < l; ++i) {
+            csvRows.push(rowData[i].join(','));
+        }
+
+        var csvString = csvRows.join("\n");
+        var a = document.createElement('a');
+        a.href = 'data:attachment/csv,' + encodeURIComponent(csvString);
+        a.target = '_blank';
+        if (rowData.length > 1) {
+            a.download = String(track.id) + '.csv';
+        } else {
+            a.download = 'empty.csv';
+        }
+        document.body.appendChild(a);
+        a.click();
 
     });
     return;
