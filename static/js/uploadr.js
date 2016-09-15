@@ -422,7 +422,7 @@ function exportData(e, pid ){
         a.href = 'data:attachment/csv,' + encodeURIComponent(csvString);
         a.target = '_blank';
         if (rowData.length > 1) {
-            a.download = String(track.id) + '.csv';
+            a.download = String(pid) + '.csv';
         } else {
             a.download = 'empty.csv';
         }
