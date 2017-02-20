@@ -1,5 +1,5 @@
 // playlist id
-var pid = PLAYLISTID;
+var pid = localStorage.getItem('recentsatsang') || null;
 
 // TRACKS ARRAY
 var TRACKS = [];
@@ -30,6 +30,13 @@ $(document).ready(function() {
 
     // Initialize.
     SC.initialize( PARAMS );
+
+    // Do we have playlist id?
+    if (pid == null) {
+        alert("Please click on Add Recent Satsang tab" +
+        " so I can grab playlist id. (Only for first time)");
+        return;
+    }
 
     // Handle the download button
     $("#download-button").on("click", function(e) {
