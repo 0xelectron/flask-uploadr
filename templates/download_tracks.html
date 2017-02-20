@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Download Tracks {% endblock %}
+{% block content %}
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        <h3 class="panel-title">Download Tracks</h3>
+    </div>
+    <div class="panel-body">
+        <form id="downloadTracksForm" name="DownloadTracksForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label class="control-label" for="search-query">Search</label>
+              <input class="form-control" id="search-query" type="text">
+            </div>
+            <div id="info-bar" class="container" style="display: none;"></div>
+            <div id="progress" class="progress progress-striped active" style="display: none;">
+                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <input id="download-button" class="btn btn-primary start" type="submit" name="submit" value="Download">
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript">
+        localStorage.setItem('oauth_token', '{{ oauth_token }}');
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/soundcloud.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jszip.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jszip-utils.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/downloadr.js') }}"></script>
+{% endblock %}

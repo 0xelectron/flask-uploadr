@@ -66,6 +66,11 @@ def upload(audio):
     else:
         abort(404)
 
+@app.route("/download")
+def download_tracks():
+    checkConnection()
+    return render_template("download_tracks.html", oauth_token=session['oauth_token'])
+
 if __name__ == "__main__":
     # flask_options = dict(
     #     host='localhost',
