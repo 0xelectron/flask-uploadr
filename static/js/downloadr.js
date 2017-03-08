@@ -57,7 +57,7 @@ $(document).ready(function() {
 function downloadTracks(e) {
 
     // only alphanumeric querry allowed
-    var re = new RegExp("^[a-zA-Z0-9_]*$")
+    var re = new RegExp("[a-zA-Z0-9!@#$&()\\-`.+,/\" ]*$")
 
     // entered querry
     var sq = document.forms["downloadTracksForm"]["search-query"].value || null;
