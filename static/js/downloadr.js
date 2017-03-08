@@ -52,7 +52,7 @@ $(document).ready(function() {
 });
 
 
-// function to download the tracks matching 
+// function to download the tracks matching
 // the given query
 function downloadTracks(e) {
 
@@ -61,6 +61,20 @@ function downloadTracks(e) {
 
     // entered querry
     var sq = document.forms["downloadTracksForm"]["search-query"].value || null;
+    // from date
+    var fdate = document.forms["downloadTracksForm"]["from-date"].value || null;
+    // to date
+    var tdate = document.forms["downloadTracksForm"]["to-date"].value || null;
+    if (!sq) {
+        alert("You need to enter search querry");
+        return;
+    }
+    if (!(fdate && tdate)) {
+        alert("You need to enter from and to date");
+        return;
+    }
+    fd = new Date(fdate);
+    td = new Date(tdate);
 
     e.preventDefault();
 
@@ -69,13 +83,17 @@ function downloadTracks(e) {
     $infoBar.css('display', '');
 
     // is querry entered proper?
-    if (sq != null && re.test(sq)) {
+    if (re.test(sq)) {
         // get the list of tracks from playlist
         SC.get('/playlists/'+pid).then(function(playlist) {
-            // for each track 
+            // for each track
             playlist.tracks.forEach(function(t) {
-                // is querry in track title?
-                if (t.title.search(sq) != -1)
+                // created at date for the track
+                var cd = new Date(t.created_at);
+
+                // is querry in track title and is track in range of
+                // given date?
+                if (t.title.search(sq) != -1 && cd >= fd && cd <= td)
                     TRACKS.push(t)
             });
 
@@ -141,7 +159,7 @@ function generateZip() {
                 // hide prgress bar
                 $("#progress").css('display', 'none');
 
-                // generate zip 
+                // generate zip
                 ZIP.generateAsync({type:"blob"})
                     .then(function (blob) {
                         saveAs(blob, "tracks.zip");
@@ -183,7 +201,7 @@ function reload(t=3, m=none, err=false) {
     m += "<br/> Note: Reloading window in " + t + " secs."
 
     // show msg
-    if (err) 
+    if (err)
         showInfo(m, true)
     else
         showInfo(m)
