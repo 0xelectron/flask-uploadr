@@ -44,10 +44,11 @@
         localStorage.setItem('oauth_token', '{{ oauth_token }}');
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/soundcloud.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/StreamSaver.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/jszip.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/jszip-utils.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/downloadr.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polyfill.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-datetimepicker.min.js') }}"></script>
     <script type="text/javascript">
         $(".datetimepicker").datetimepicker({

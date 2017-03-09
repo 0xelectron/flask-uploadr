@@ -61,6 +61,8 @@ function downloadTracks(e) {
 
     // entered querry
     var sq = document.forms["downloadTracksForm"]["search-query"].value || null;
+    sq = sq.toLowerCase();
+
     // from date
     var fdate = document.forms["downloadTracksForm"]["from-date"].value || null;
     // to date
@@ -91,9 +93,11 @@ function downloadTracks(e) {
                 // created at date for the track
                 var cd = new Date(t.created_at);
 
+                var title = t.title.toLowerCase();
+
                 // is querry in track title and is track in range of
                 // given date?
-                if (t.title.search(sq) != -1 && cd >= fd && cd <= td)
+                if (title.search(sq) != -1 && cd >= fd && cd <= td)
                     TRACKS.push(t)
             });
 
@@ -119,6 +123,7 @@ function generateZip() {
     var count = 0;
     var tl = TRACKS.length;
     var p = 0.0;
+
 
     // have we found any matching tracks?
     if (tl < 1) {
@@ -160,9 +165,13 @@ function generateZip() {
                 $("#progress").css('display', 'none');
 
                 // generate zip
-                ZIP.generateAsync({type:"blob"})
+                ZIP.generateAsync({type:"uint8array"})
                     .then(function (blob) {
-                        saveAs(blob, "tracks.zip");
+
+                        const filestream = streamSaver.createWriteStream('tracks.zip');
+                        const writer = filestream.getWriter();
+                        writer.write(blob);
+                        writer.close();
                         setTimeout(function() {
                             reload(5, "Done!")}, 3000);
                     }, function(err) {
