@@ -1,3 +1,6 @@
+//  Max Zip Size
+var mzs = 500 * 1024 * 1024; // 500 MB
+
 // playlist id
 var pid = localStorage.getItem('recentsatsang') || null;
 
@@ -23,8 +26,9 @@ var PARAMS = {
 };
 
 
-// to collect tracks in zip
-var ZIP = new JSZip();
+// to collect tracks in zips
+var ZIPS = [];
+ZIPS[0] = new JSZip();
 
 $(document).ready(function() {
 
@@ -123,7 +127,8 @@ function generateZip() {
     var count = 0;
     var tl = TRACKS.length;
     var p = 0.0;
-
+    var cs = 0;
+    var i = 0;
 
     // have we found any matching tracks?
     if (tl < 1) {
@@ -151,8 +156,17 @@ function generateZip() {
                 return;
             }
 
+            cs += t.original_content_size;
+
+            if (cs >= mzs) {
+                popUp(ZIPS[i], i);
+                i++;
+                cs = t.original_content_size;
+                ZIPS[i] = new JSZip();
+            }
+
             // add track to our zip container
-            ZIP.file(title+'.mp3', data, {binary: true});
+            ZIPS[i].file(title+'.mp3', data, {binary: true});
 
             count++;
             p = Math.round((count * 100.0) / tl);
@@ -165,13 +179,9 @@ function generateZip() {
                 $("#progress").css('display', 'none');
 
                 // generate zip
-                ZIP.generateAsync({type:"uint8array"})
+                ZIPS[i].generateAsync({type:'blob'})
                     .then(function (blob) {
-
-                        const filestream = streamSaver.createWriteStream('tracks.zip');
-                        const writer = filestream.getWriter();
-                        writer.write(blob);
-                        writer.close();
+                        saveAs(blob, 'tracks' + i + '.zip');
                         setTimeout(function() {
                             reload(5, "Done!")}, 3000);
                     }, function(err) {
@@ -181,6 +191,18 @@ function generateZip() {
 
         });
     });
+}
+
+
+function popUp(zip, i) {
+
+    // generate zip
+    zip.generateAsync({type:'blob'})
+        .then(function (blob) {
+            saveAs(blob, 'tracks' + i + '.zip');
+        }, function(err) {
+            reload(m=err, err=true);
+        });
 }
 
 // showInfo: function to show any info/error on
