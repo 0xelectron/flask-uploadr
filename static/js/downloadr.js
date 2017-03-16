@@ -177,16 +177,8 @@ function generateZip() {
             if (count == tl){
                 // hide prgress bar
                 $("#progress").css('display', 'none');
-
                 // generate zip
-                ZIPS[i].generateAsync({type:'blob'})
-                    .then(function (blob) {
-                        saveAs(blob, 'tracks' + i + '.zip');
-                        setTimeout(function() {
-                            reload(5, "Done!")}, 3000);
-                    }, function(err) {
-                        reload(m=err, err=true);
-                    });
+                popUp(ZIPS[i], i);
             }
 
         });
@@ -197,9 +189,12 @@ function generateZip() {
 function popUp(zip, i) {
 
     // generate zip
-    zip.generateAsync({type:'blob'})
+    zip.generateAsync({type:'uint8array'})
         .then(function (blob) {
-            saveAs(blob, 'tracks' + i + '.zip');
+            const filestream = streamSaver.createWriteStream('tracks' + i + '.zip');
+            const writer = filestream.getWriter();
+            writer.write(blob);
+            writer.close();
         }, function(err) {
             reload(m=err, err=true);
         });
