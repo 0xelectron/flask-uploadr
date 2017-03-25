@@ -1,6 +1,3 @@
-//  Max Zip Size
-var mzs = 500 * 1024 * 1024; // 500 MB
-
 // playlist id
 var pid = localStorage.getItem('recentsatsang') || null;
 
@@ -9,12 +6,6 @@ var TRACKS = [];
 
 // download url
 var suffix_url = "?oauth_token=" + localStorage.getItem('oauth_token');
-
-// Number of results per request.
-var PAGE_SIZE = 1;
-
-// Progress Bar
-var $progressBar = $("#progress-bar");
 
 // Info bar
 var $infoBar = $("#info-bar");
@@ -25,12 +16,34 @@ var PARAMS = {
         scope: 'non-expiring',
 };
 
+// Metalink Header
+var M_HEADER = '<?xml version="1.0" encoding="UTF-8"?>' +
+               '<metalink xmlns="urn:ietf:params:xml:ns:metalink">' +
+               '<published>' + Date.now() + '</published>'
 
-// to collect tracks in zips
-var ZIPS = [];
-ZIPS[0] = new JSZip();
+// Metalink Footer
+var M_FOOTER = '</metalink>'
+
+
+// Metalink Data
+var M_DATA = M_HEADER
 
 $(document).ready(function() {
+
+    // Check for supported browser
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    if (!isFirefox) {
+        $("#wrong-browser").append(
+        '<div class="col-lg-4">' +
+            '<div class="alert alert-dismissible alert-danger">' +
+                '<button type="button" class="close" data-dismiss="alert">&times;</button> ' +
+                '<strong>Oh snap!</strong> Currently, Soundcloud Downloader best works with ' +
+                '<a href="https://www.mozilla.org/en-US/firefox/new/" class="alert-link">firefox ' +
+                '</a> and <a href="https://addons.mozilla.org/en-gb/firefox/addon/downthemall/" ' +
+                'class="alert-link">downthemall</a> extension for firefox.' +
+            '</div>' +
+        '</div>');
+    }
 
     // Initialize.
     SC.initialize( PARAMS );
@@ -84,10 +97,6 @@ function downloadTracks(e) {
 
     e.preventDefault();
 
-    // show prgress and info bars
-    $("#progress").css('display', '');
-    $infoBar.css('display', '');
-
     // is querry entered proper?
     if (re.test(sq)) {
         // get the list of tracks from playlist
@@ -105,8 +114,8 @@ function downloadTracks(e) {
                     TRACKS.push(t)
             });
 
-            // generate zip
-            generateZip();
+            // generate metalink
+            generateMetalink();
 
         })
     }
@@ -116,22 +125,13 @@ function downloadTracks(e) {
     }
 }
 
-// funtion to download the tracks from given url
-// and gnereate a zip of downloaded tracks
-function generateZip() {
-
-    // show Progress
-    progress(0);
-
-    // to count the end of loop
-    var count = 0;
-    var tl = TRACKS.length;
-    var p = 0.0;
-    var cs = 0;
-    var i = 0;
+// generateMetalink: funtion to generate the
+// metalink for tracks. To be downloaded from
+// a supported downloader like downthemall in firefox
+function generateMetalink() {
 
     // have we found any matching tracks?
-    if (tl < 1) {
+    if (TRACKS.length < 1) {
         reload(10, "No matching tracks found!", true);
         return;
     }
@@ -140,84 +140,64 @@ function generateZip() {
     TRACKS.forEach(function(t) {
 
         // track title
-        var title = t.title;
+        var title = t.title + '.mp3';
         // track url
         var url = t.download_url + suffix_url;
+        // track size
+        var size = t.original_content_size;
 
         // showInfo
-        showInfo("Found " + tl + " Tracks! <br/> Now, Downloading...");
+        showInfo("Found " + tl + " Tracks! <br/> Now, Generating metalink...");
 
-        // get track from url
-        JSZipUtils.getBinaryContent(url, function(err, data) {
+        // add track as file element in metalink
+        addFileElement(title, size, url);
 
-            // any error?
-            if(err) {
-                reload(10, err, true);
-                return;
-            }
-
-            cs += t.original_content_size;
-
-            if (cs >= mzs) {
-                popUp(ZIPS[i], i);
-                i++;
-                cs = t.original_content_size;
-                ZIPS[i] = new JSZip();
-            }
-
-            // add track to our zip container
-            ZIPS[i].file(title+'.mp3', data, {binary: true});
-
-            count++;
-            p = Math.round((count * 100.0) / tl);
-            progress(p);
-            showInfo(p + "%");
-
-            // have we downloaded all tracks?
-            if (count == tl){
-                // hide prgress bar
-                $("#progress").css('display', 'none');
-                // generate zip
-                popUp(ZIPS[i], i);
-            }
-
-        });
     });
+
+    popUp();
+    showInfo("Done! Hopefully a popup would have been generated in downthemall. " +
+             "You can now select the tracks you want to download as well as " +
+             "monitor its download progress.");
 }
 
+// addFileElement: function to add file metadata to metalink
+// takes name, size and url as argument
+function addFileElement(name, size, url) {
+    var file = '<file name="' + name + '.mp3">' +
+                '<size>' + size + '</size>' +
+                '<url priority="1">' + url + '</url>' +
+                '</file>'
 
-function popUp(zip, i) {
+    M_DATA += file
+    return;
+}
 
-    // generate zip
-    zip.generateAsync({type:'uint8array'})
-        .then(function (blob) {
-            const filestream = streamSaver.createWriteStream('tracks' + i + '.zip');
-            const writer = filestream.getWriter();
-            writer.write(blob);
-            writer.close();
-        }, function(err) {
-            reload(m=err, err=true);
-        });
+// popUp: function to popup metalink for download managers to grab
+function popUp() {
+        var a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style = "display: none";
+        M_DATA += M_FOOTER;
+        var blob = new Blob([M_DATA], {type : 'application/metalink4+xml'});
+        var url = URL.createObjectURL(blob);
+
+        a.href = url;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        return;
 }
 
 // showInfo: function to show any info/error on
 // the page
 function showInfo(data, err=false) {
+    // make infobar visible
+    $infoBar.css('display', '');
+
     // is the info about any error?
     if (err)
         $infoBar.html('<p class="text-danger" align="center"> Error Occured: ' + data + '</p>');
     else
         $infoBar.html('<p class="text-success" align="center"> ' + data + '</p>');
-}
-
-// progress: function to calculate total progress.
-// takes progress event as argument.
-function progress(p){
-
-    // update progress bar.
-    $progressBar.css({"width" : p + "%"});
-
-    return;
 }
 
 // reload: function to reload after t seconds

@@ -4,6 +4,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-datetimepicker.min.css') }}">
 {% endblock %}
 {% block content %}
+<div id="wrong-browser"class="row">
+</div>
 <div class="panel panel-danger">
     <div class="panel-heading">
         <h3 class="panel-title">Download Tracks</h3>
@@ -30,9 +32,6 @@
             </div>
             <div class="form-group">
                 <div id="info-bar" class="container" style="display: none;"></div>
-                <div id="progress" class="progress progress-striped active" style="display: none;">
-                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
-                </div>
             </div>
             <input id="download-button" class="btn btn-primary start" type="submit" name="submit" value="Download">
         </form>
@@ -44,10 +43,6 @@
         localStorage.setItem('oauth_token', '{{ oauth_token }}');
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/soundcloud.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/StreamSaver.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/polyfill.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/jszip.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/jszip-utils.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/downloadr.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-datetimepicker.min.js') }}"></script>
     <script type="text/javascript">
