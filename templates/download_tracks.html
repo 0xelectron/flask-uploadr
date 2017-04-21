@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Download Tracks {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-datetimepicker.min.css') }}">
+{% endblock %}
+{% block content %}
+<div id="wrong-browser"class="row">
+</div>
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        <h3 class="panel-title">Download Tracks</h3>
+    </div>
+    <div class="panel-body">
+        <form id="downloadTracksForm" name="DownloadTracksForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="control-label" for="search-query">Search</label>
+                <input class="form-control" id="search-query" type="text">
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="from-date">from</label>
+                <div class="input-group">
+                    <span class="input-group-addon"> <span class="glyphicon glyphicon-calendar"></span></span>
+                    <input class="form-control input-sm datetimepicker" type="text" value="" id="from-date">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="to-date">to</label>
+                <div class="input-group">
+                    <span class="input-group-addon"> <span class="glyphicon glyphicon-calendar"></span></span>
+                    <input class="form-control input-sm datetimepicker" type="text" value="" id="to-date">
+                </div>
+            </div>
+            <div class="form-group">
+                <div id="info-bar" class="container" style="display: none;"></div>
+            </div>
+            <input id="download-button" class="btn btn-primary start" type="submit" name="submit" value="Download">
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript">
+        localStorage.setItem('oauth_token', '{{ oauth_token }}');
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/soundcloud.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/downloadr.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-datetimepicker.min.js') }}"></script>
+    <script type="text/javascript">
+        $(".datetimepicker").datetimepicker({
+            format: "yyyy-mm-dd hh:mm:ss",
+            autoclose: true,
+            todayBtn: true,
+            pickerPosition: "bottom-left"
+        });
+    </script>
+{% endblock %}

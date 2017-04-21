@@ -10,12 +10,12 @@ var MAX_UPLOAD_FILE_SIZE = 1024*1024*500; // 500 MB
 var URL = window.location.href;
 
 // Number of results per request.
-var PAGE_SIZE = 75;
+var PAGE_SIZE = 70;
 
 // Parameters for Soundcloud Initialize
 var PARAMS = {
-        client_id: 'YOUR_CLIENT_ID',
-        redirect_uri: 'YOUR_CALLBACK_URL_AS_IN_YOUR_APP',
+        // client_id: 'YOUR_CLIENT_ID',
+        // redirect_uri: 'YOUR_CALLBACK_URL_AS_IN_YOUR_APP',
         oauth_token: localStorage.getItem('oauth_token') || undefined,
         scope: 'non-expiring',
 };
@@ -112,29 +112,29 @@ $(document).ready(function() {
     });
 });
 
-// function to check soundcloud connection.
-function checkConnection(){
-    // Make sure we really are.
-    SC.get("me").then( ( me ) => {
-        console.info( "Logged in!" );
-        $("#connect").hide();
-    }, ( err ) => {
-        console.error('Problem logging in: %o', err);
-        // Is oauth token expired?
-        if (err.status === 401) {
-            localStorage.clear();
-            window.location.reload(true);
-            connectToSoundcloud();
-        } else {
-            throw err;
-        }
-    }).catch( (err) => {
-        alert("Error: " + err.message + " ! Check console for more info.");
-        console.log("Error occured during Connecting to soundcloud. Try refreshing!");
-        console.log(err);
-        localStorage.clear();
-    });
-};
+
+// // function to check soundcloud connection.
+// function checkConnection(){
+//     // Make sure we really are.
+//     SC.get("me").then( ( me ) => {
+//         console.info( "Logged in!" );
+//         $("#connect").hide();
+//     }, ( err ) => {
+//         console.error('Problem logging in: %o', err);
+//         // Is oauth token expired?
+//         if (err.status === 401) {
+//             window.location.reload(true);
+//             connectToSoundcloud();
+//         } else {
+//             throw err;
+//         }
+//     }).catch( (err) => {
+//         alert("Error: " + err.message + " ! Check console for more info.");
+//         console.log("Error occured during Connecting to soundcloud. Try refreshing!");
+//         console.log(err);
+//     });
+// };
+
 
 // function to connect to soundcloud.
 function connectToSoundcloud() {
@@ -165,7 +165,6 @@ function connectToSoundcloud() {
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during Connecting to soundcloud. Try refreshing!");
         console.log(err);
-        localStorage.clear();
     });
 };
 
@@ -178,7 +177,7 @@ function setupSoundcloud(){
     // Connect.
     if ( SC.isConnected() ) {
         $("#connect").hide();
-        checkConnection();
+        // checkConnection();
     }
     else {
         connectToSoundcloud();
@@ -259,8 +258,11 @@ function createPlaylist ( title, tracks ){
         // catch any errors.
     }).then( (e) =>{
         DROP.innerHTML = '<p class="text-danger" align="center"> Done';
-        // Reload after 3 seconds
-        setTimeout(window.location.reload(true), 3000);
+
+        // Reload after 3 seconds.
+        setTimeout(function() {
+            window.location.reload(true)}, 3000);
+
     }).catch(function(err){
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during creating playlist");
@@ -291,7 +293,10 @@ function updatePlaylist ( pid, tracks ){
     }).then( ( e ) => {
         DROP.innerHTML = '<p class="text-danger" align="center"> Done';
         // Reload after 3 seconds
-        setTimeout(window.location.reload(true), 3000);
+
+        setTimeout(function() {
+            window.location.reload(true)}, 3000);
+
     }).catch(function(err){
         alert("Error: " + err.message + " ! Check console for more info.");
         console.log("Error occured during updating playlist");
@@ -385,16 +390,12 @@ function progress( e ){
 function exportData(e, pid ){
 
     e.preventDefault();
-    // write an csv file.
-    var csvWriter = new SimpleExcel.Writer.CSV();
-    var csvSheet = new SimpleExcel.Sheet();
-    var Cell = SimpleExcel.Cell;
+    csvRows = []
     var tids = [];
     var tData = {};
 
-    // insert new record.
-    csvSheet.insertRecord([new Cell('Track Name', 'TEXT'), new Cell('Track ID', 'TEXT'),
-            new Cell('Playback Count', 'TEXT'), new Cell('Duration', 'TEXT')]);
+    // insert header.
+    rowData = [['Track Name', 'Track ID', 'Playback Count', 'Duration']]
 
     // Get track Data
     SC.get('/playlists/' + pid).then(function(playlist) {
@@ -416,13 +417,26 @@ function exportData(e, pid ){
             if ( track.hasOwnProperty('secret_token') ) {
                 trackid += track['secret_token'];
             }
-            // insert new record
-            csvSheet.insertRecord([new Cell(track['title'], 'TEXT'), new Cell(trackid, 'TEXT'),
-            new Cell(track['playback_count'], 'NUMBER'), new Cell(track['duration'], 'NUMBER')]);
+            // insert new row
+            rowData.push([track['title'], trackid, track['playback_count'], track['duration']])
         }
 
-        csvWriter.insertSheet(csvSheet);
-        csvWriter.saveFile(); // pop! ("Save As" dialog appears)
+        // join rows
+        for (var i = 0, l = rowData.length; i < l; ++i) {
+            csvRows.push(rowData[i].join(','));
+        }
+
+        var csvString = csvRows.join("\n");
+        var a = document.createElement('a');
+        a.href = 'data:attachment/csv,' + encodeURIComponent(csvString);
+        a.target = '_blank';
+        if (rowData.length > 1) {
+            a.download = String(pid) + '.csv';
+        } else {
+            a.download = 'empty.csv';
+        }
+        document.body.appendChild(a);
+        a.click();
 
     });
     return;
