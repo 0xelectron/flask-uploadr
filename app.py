@@ -61,6 +61,8 @@ def upload(audio):
 
     if audio == "recent-satsang":
         return render_template("satsang_upload.html", oauth_token=session['oauth_token'])
+    elif audio == "kids-stories":
+        return render_template("kids_stories_upload.html", oauth_token=session['oauth_token'])
     elif audio == "tracks":
         return render_template("track_upload.html", oauth_token=session['oauth_token'])
     else:

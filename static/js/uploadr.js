@@ -1,7 +1,7 @@
-/******************************************************************************
- * soundcloud-uploadr                                                         *
- * Copyright (c) 2016 0xelectron                                              *
- ******************************************************************************/
+/********************************************************************************
+ * Soundcloud-Uploadr                                                           *
+ * Copyright (c) 2017 0xelectron                                                *
+ *******************************************************************************/
 
 // Max size
 var MAX_UPLOAD_FILE_SIZE = 1024*1024*500; // 500 MB
@@ -48,16 +48,27 @@ var $progressBar = $("#progress-bar");
 // Calculate total Progress.
 var PROGRESS = {};
 
-// Check if need to upload recent satsang.
-var RECENT = URL.search("recent-satsang");
+// Upload to specific playlist
+var IMPLICIT_PLAYLISTS = {"recent-satsang":"recentsatsang",
+                            "kids-stories":"kidsstories"};
+var IMPLICIT_PLAYLIST = "";
+var IMPLICIT = false;
 
 var USERNAME = localStorage.getItem("username") || null;
 
 $(document).ready(function() {
 
-    if ( USERNAME ){
+    if ( USERNAME )
         $("#username").append('<a href="https://www.soundcloud.com/' + USERNAME + '" > Hi ' + USERNAME + '!</a>');
-    }
+
+    // which implicit playlist is it, if any?
+    Object.keys(IMPLICIT_PLAYLISTS).forEach(function(k){
+        if (URL.search(k) > 0) {
+            IMPLICIT_PLAYLIST = IMPLICIT_PLAYLISTS[k];
+            IMPLICIT = true;
+        }
+    })
+
     // Set up SoundCloud
     setupSoundcloud();
 
@@ -88,11 +99,11 @@ $(document).ready(function() {
     $("#export-button").on("click",function(e){
         // Check if we are connected to soundcloud?
         if ( SC.isConnected() ){
-            // check if it's recent-satsang page?
-            if ( RECENT > 0 ){
+            // check if it's implicit palylist page?
+            if (IMPLICIT){
                 e.preventDefault();
                 // create csv data file.
-                exportData(e, localStorage.getItem("recentsatsang"));
+                exportData(e, localStorage.getItem(IMPLICIT_PLAYLIST));
             } else {
                 // Check if we have playlist selected?
                 var x = document.forms["uploadForm"]["playlist"].value || null;
@@ -112,28 +123,6 @@ $(document).ready(function() {
     });
 });
 
-
-// // function to check soundcloud connection.
-// function checkConnection(){
-//     // Make sure we really are.
-//     SC.get("me").then( ( me ) => {
-//         console.info( "Logged in!" );
-//         $("#connect").hide();
-//     }, ( err ) => {
-//         console.error('Problem logging in: %o', err);
-//         // Is oauth token expired?
-//         if (err.status === 401) {
-//             window.location.reload(true);
-//             connectToSoundcloud();
-//         } else {
-//             throw err;
-//         }
-//     }).catch( (err) => {
-//         alert("Error: " + err.message + " ! Check console for more info.");
-//         console.log("Error occured during Connecting to soundcloud. Try refreshing!");
-//         console.log(err);
-//     });
-// };
 
 
 // function to connect to soundcloud.
@@ -168,6 +157,8 @@ function connectToSoundcloud() {
     });
 };
 
+
+
 // function to set up Soundcloud api
 function setupSoundcloud(){
 
@@ -185,6 +176,8 @@ function setupSoundcloud(){
 
 };
 
+
+
 // function to get all the Playlists recursively.
 // takes playlists object as argument.
 function getPlaylists ( playlists ){
@@ -196,12 +189,10 @@ function getPlaylists ( playlists ){
         SELECT.addOption(pl);
         // Refresh select option.
         SELECT.refreshOptions();
-        // Also add recentsatsang playlist id to localstorage.
-        if ( !localStorage.getItem('recentsatsang') ) {
-            if ( pl.title.toLowerCase().replace(/ /g,'') === "recentsatsang" ) {
-                localStorage.setItem('recentsatsang', pl.id);
-            }
-        }
+        // Also add implicit playlist id to localstorage.
+        if (!localStorage.getItem(IMPLICIT_PLAYLIST))
+            if (pl.title.toLowerCase().replace(/ /g,'') === IMPLICIT_PLAYLIST )
+                localStorage.setItem(IMPLICIT_PLAYLIST, pl.id);
     }
     // Do we still have more playlists?
     if ( playlists.hasOwnProperty( "next_href" ) ){
@@ -210,6 +201,8 @@ function getPlaylists ( playlists ){
     }
     return;
 }
+
+
 
 // function to initialize form.
 function initForm() {
@@ -220,10 +213,10 @@ function initForm() {
     // hide progress bar
     $("#progress").hide();
 
-    // is is recent-satsang page?
-    if ( RECENT > 0 && localStorage.getItem('recentsatsang') ){
+    // is it Implicit playlists page?
+    if (IMPLICIT && localStorage.getItem(IMPLICIT_PLAYLIST))
         return;
-    }
+
     // Call getPlaylists to get all playlists recursively.
     SC.get('/me/playlists', {
       limit: PAGE_SIZE, linked_partitioning: 1,
@@ -242,6 +235,8 @@ function initForm() {
         }
     });
 }
+
+
 
 // function to create new playlist.
 // takes playlist title and tracks as argument.
@@ -271,6 +266,8 @@ function createPlaylist ( title, tracks ){
     });
 
 }
+
+
 
 // function to update Playlist.
 // takes playlist id and tracks as argument.
@@ -304,6 +301,8 @@ function updatePlaylist ( pid, tracks ){
     });
 
 }
+
+
 
 // function to upload tracks.
 // takes form data as argument.
@@ -344,24 +343,24 @@ function uploadTracks ( fd ){
         }
 
         // create new playlist?
-
         if ( fd.has("n_playlist") && fd.get("n_playlist") != "" ) {
             createPlaylist(fd.get("n_playlist"), tracks );
         } else {
-            // is it recent-satsang page?
-            if ( RECENT > 0 ) {
+            // is it Implicit playlist page?
+            if (IMPLICIT)
                 // grab playlist id from localstorage.
-                pid = localStorage.getItem("recentsatsang");
-            } else {
+                pid = localStorage.getItem(IMPLICIT_PLAYLIST);
+            else
                 // grab playlist id from select option.
                 pid = fd.get("playlist");
-            }
             // update playlist.
             updatePlaylist(pid, tracks);
         }
 
     });
 }
+
+
 
 // function to calculate total progress.
 // takes progress event as argument.
@@ -384,6 +383,8 @@ function progress( e ){
     }
     return;
 }
+
+
 
 // function to create csv data file.
 // takes event and playlist id as argument.
@@ -442,6 +443,8 @@ function exportData(e, pid ){
     return;
 }
 
+
+
 // function to validate form
 // takes event as argument
 function validateForm(e) {
@@ -449,8 +452,8 @@ function validateForm(e) {
     var upload = true;
     e.preventDefault();
 
-    // is it recent-satsang page?
-    if ( RECENT > 0 ){
+    // is it Implicit playlist page?
+    if (IMPLICIT){
         // Are files selected?
         if ( PENDING_FILES.length == 0 && upload == true ){
             alert("You may want to add files!");
@@ -495,6 +498,8 @@ function validateForm(e) {
     }
 }
 
+
+
 // function to handle uploads.
 function doUpload() {
 
@@ -520,6 +525,8 @@ function doUpload() {
     return;
 
 }
+
+
 
 // function to collect form data.
 function collectFormData() {
@@ -555,6 +562,8 @@ function collectFormData() {
     return fd;
 }
 
+
+
 // function to handle files selected.
 // takes files as argument.
 function handleFiles(files) {
@@ -573,6 +582,8 @@ function handleFiles(files) {
     }
     DROP.innerHTML = '<p class="text-success" align="center">' + PENDING_FILES.length + ' files ready for upload';
 }
+
+
 
 // function to handle drag and drop of files.
 function initDropbox() {
@@ -617,3 +628,5 @@ function initDropbox() {
     $(document).on("dragover", stopDefault);
     $(document).on("drop", stopDefault);
 }
+
+
